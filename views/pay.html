@@ -11,22 +11,17 @@
         <h1>My paymnents app buyer page</h1>
         <div>Payment session body:</div>
         <div>
-           <p style=""><%= JSON.stringify(body, null, 4) %></p> 
+           <p><%= JSON.stringify(body, null, 2).replace(/ /g, "&nbsp;") %></p> 
         </div>
-        <div>My key (set on the admin page):</div>
-        <div>
-            <%= my_key %>
-        </div>
-        <div>Choose a action:</div>
-        <div>
+        <div>My key (set on the admin page):<%= my_key %></div>
+        <div>Choose a action:
             <select id="action">
                 <option value="resolve">Resolve</option>
                 <option value="pending">Pending</option>
                 <option value="reject">Reject</option>
             </select>
         </div>
-        <div>Error message (for "Reject" only):</div>
-        <div><input id="error" type="text" value=""></div>
+        <div>Error message (for "Reject" only):<input id="error" type="text" value=""></div>
         <br/>
         <div><button id="process">Process</button>&nbsp;&nbsp;<button id="cancel">Cancel</button></div>
     </div>
