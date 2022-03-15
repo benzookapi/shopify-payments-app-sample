@@ -12,7 +12,9 @@
         <div>Payment session body:
            <p><%= JSON.stringify(body, null, 2).replace(/ /g, "&nbsp;") %></p> 
         </div>
-        <div>My key (set on the admin page):<%= my_key %></div>
+        <br/>
+        <div>My key:<%= my_key %></div>
+        <br/>
         <div>Choose a action:
             <select id="action">
                 <option value="resolve">Resolve</option>
@@ -20,7 +22,9 @@
                 <option value="reject">Reject</option>
             </select>
         </div>
+        <br/>
         <div>Error message (for "Reject" only):<input id="error" type="text" value=""></div>
+        <br/>
         <br/>
         <div><button id="process">Process</button>&nbsp;&nbsp;<button id="cancel">Cancel</button></div>
     </div>
