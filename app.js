@@ -311,7 +311,7 @@ router.get('/process', async (ctx, next) => {
       "pendingExpiresAt": getAuthExpired(),
       "reason": "BUYER_ACTION_REQUIRED"
     };
-    await callGraphql(ctx, shop, `mutation PaymentSessionPending($id: ID!, $pendingExpiresAt: DateTime!, $reason: PaymentSessionStatesPendingReason!) {
+    await callGraphql(ctx, shop, `mutation PaymentSessionPending($id: ID!, $pendingExpiresAt: DateTime!, $reason: PaymentSessionStatePendingReason!) {
       paymentSessionPending(id: $id, pendingExpiresAt: $pendingExpiresAt, reason: $reason) {
         paymentSession {
           id
