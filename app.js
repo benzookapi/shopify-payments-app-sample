@@ -228,6 +228,7 @@ router.post('/payment', async (ctx, next) => {
 
   ctx.body = {
     "redirect_url": `https://${ctx.request.hostname}/pay?token=${createJWT({
+      "headers": ctx.headers,
       "body": ctx.request.body,
       "shop": shop
     })}`
@@ -241,6 +242,7 @@ router.get('/pay', async (ctx, next) => {
   const data = decodeJWT(ctx.request.query.token);
   console.log(`+++ data +++ ${JSON.stringify(data)}`);
 
+  const headers = data.headers;
   const body = data.body;
   const shop = data.shop;
 
@@ -259,6 +261,7 @@ router.get('/pay', async (ctx, next) => {
 
   await ctx.render('pay', {
     shop: shop,
+    headers: headers,
     body: body,
     my_key: shop_data.config.my_key,
     cancel_url: body.payment_method.data.cancel_url,
