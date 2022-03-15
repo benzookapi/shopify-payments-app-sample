@@ -25,7 +25,10 @@ or
 https://shopify.dev/apps/payments/creating-a-payments-app/creating-a-payments-app#payments-app-extension-configuration-fields
 
 Payment session URL: /payment
+
 Refund session URL: /refund
+
 Capture session URL: /capture
+
 Void session URL: /void
 
