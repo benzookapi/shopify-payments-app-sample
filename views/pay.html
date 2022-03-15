@@ -3,12 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@5.0.0/dist/styles.css" />
 </head>
 <title>Pay</title>
 
 <body>
-    <div style=" display: flex; justify-content: center; align-items: center;">
+    <div style="margin-left: auto; margin-right: auto; width: 50%; text-align: center;">
+        <h1>My paymnents app buyer page</h1>
         <div>Payment session body:</div>
         <div>
             <%= JSON.stringify(body) %>
@@ -27,9 +27,8 @@
         </div>
         <div>Error message (for "Reject" only):</div>
         <div><input id="error" type="text" value=""></div>
-        <div></div>
-        <div><button id="process">Process</button></div>
-        <div><button id="cancel">Cancel</button></div>
+        <br/>
+        <div><button id="process">Process</button>&nbsp;&nbsp;<button id="cancel">Cancel</button></div>
     </div>
 
     <script>
