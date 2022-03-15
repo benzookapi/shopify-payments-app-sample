@@ -28,3 +28,11 @@ Capture session URL: /capture
 
 Void session URL: /void
 
+# How to complete pending sessions 
+Use the following link.
+
+YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&error=ERROR_MESSAGE_FOR_REJECT
+
+
+
+
