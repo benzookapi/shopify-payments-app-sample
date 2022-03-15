@@ -316,7 +316,7 @@ router.get('/process', async (ctx, next) => {
         paymentSession {
           id
           state {
-            ... on PaymentSessionStatesPending {
+            ... on PaymentSessionStatePending {
               reason
             }
           }
