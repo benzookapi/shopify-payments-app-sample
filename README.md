@@ -20,7 +20,7 @@ or
 
 `YOUR_APP_URL/?shop=SHOPIFY_SHOP_DOMAIN`
 
-# Map your MTLS fields
+# Map your mTLS path with payment session fields
 
 https://shopify.dev/apps/payments/creating-a-payments-app/creating-a-payments-app#payments-app-extension-configuration-fields
 
