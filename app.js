@@ -288,41 +288,11 @@ router.get('/process', async (ctx, next) => {
   const kind = data.kind;
 
   const action = ctx.request.query.action;
+  const error = ctx.request.query.error;
 
   if (action == 'resolve') {
 
-    const variables = {
-      "id": `${gid}`
-    };
-    let p1 = '';
-    let p2 = '';
-    if (kind == 'authorization') {
-      variables.authorizationExpiresAt = getAuthExpired();
-      p1 = ', $authorizationExpiresAt: DateTime';
-      p2 = ', authorizationExpiresAt: $authorizationExpiresAt';
-    }
-    await callGraphql(ctx, shop, `mutation paymentSessionResolve($id: ID!${p1}) {
-            paymentSessionResolve(id: $id${p2}) {
-              paymentSession {
-                id
-                status {
-                  code
-                }
-              nextAction {
-                action
-                context {
-                  ... on PaymentSessionActionsRedirect {
-                    redirectUrl
-                  }
-                }
-              }
-              }
-              userErrors {
-                field
-                message
-              }
-            }
-          }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (api_res) {
+    await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
       if (typeof api_res.data.paymentSessionResolve.userErrors !== UNDEFINED && api_res.data.paymentSessionResolve.userErrors.length > 0) {
         ctx.status = 500;
         ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
@@ -334,20 +304,21 @@ router.get('/process', async (ctx, next) => {
       return;
     });
 
-
   } else if (action == 'pending') {
 
-
-
-
-  } else if (action == 'reject') {
-
-    callGraphql(ctx, shop, `mutation PaymentSessionReject($id: ID!, $reason: PaymentSessionRejectionReasonInput!) {
-      paymentSessionReject(id: $id, reason: $reason) {
+    const variables = {
+      "id": `${gid}`,
+      "pendingExpiresAt": getAuthExpired(),
+      "reason": "BUYER_ACTION_REQUIRED"
+    };
+    await callGraphql(ctx, shop, `mutation PaymentSessionPending($id: ID!, $pendingExpiresAt: DateTime!, $reason: PaymentSessionStatesPendingReason!) {
+      paymentSessionPending(id: $id, pendingExpiresAt: $pendingExpiresAt, reason: $reason) {
         paymentSession {
           id
-          status {
-            code
+          state {
+            ... on PaymentSessionStatesPending {
+              reason
+            }
           }
           nextAction {
             action
@@ -355,7 +326,7 @@ router.get('/process', async (ctx, next) => {
               ... on PaymentSessionActionsRedirect {
                 redirectUrl
               }
-           }
+            }
           }
         }
         userErrors {
@@ -363,13 +334,21 @@ router.get('/process', async (ctx, next) => {
           message
         }
       }
-    }`, null, GRAPHQL_PATH_PAYMENT, {
-      "id": `${gid}`,
-      "reason": {
-        "code": "PROCESSING_ERROR",
-        "merchantMessage": `${error}`
+    }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (api_res) {
+      if (typeof api_res.data.paymentSessionPending.userErrors !== UNDEFINED && api_res.data.paymentSessionPending.userErrors.length > 0) {
+        ctx.status = 500;
+        ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
+        return;
       }
-    }).then(function (api_res) {
+      return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
+    }).catch(function (e) {
+      ctx.status = 500;
+      return;
+    });
+
+  } else if (action == 'reject') {
+
+    await rejectPaymentSession(ctx, shop, gid, error).then(function (api_res) {
       if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
         ctx.status = 500;
         ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
@@ -380,7 +359,6 @@ router.get('/process', async (ctx, next) => {
       ctx.status = 500;
       return;
     });
-
 
   } else {
     ctx.status = 400;
@@ -554,6 +532,126 @@ router.post('/void', async (ctx, next) => {
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;
 });
+
+router.get('/pendingcomplete', async (ctx, next) => {
+  console.log("+++++++++++++++ /pendingcomplete +++++++++++++++");
+  console.log(`+++ body +++ ${JSON.stringify(ctx.request.body)}`);
+
+  const shop = ctx.request.query.shop;
+  const gid = `gid://shopify/PaymentSession/${ctx.request.query.id}`;
+  const kind = ctx.request.query.kind;
+
+  const action = ctx.request.query.action;
+  const error = ctx.request.query.error;
+
+  if (action == 'resolve') {
+
+    await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
+      ctx.body = `${JSON.stringify(api_res.data, null, 2)}`;
+      return;
+    }).catch(function (e) {
+      ctx.status = 500;
+      return;
+    });
+
+  } else if (action == 'reject') {
+
+    await rejectPaymentSession(ctx, shop, gid, error).then(function (api_res) {
+      ctx.body = `${JSON.stringify(api_res.data, null, 2)}`;
+      return;
+    }).catch(function (e) {
+      ctx.status = 500;
+      return;
+    });
+
+  } else {
+    ctx.status = 400;
+    return;
+  }
+
+});
+
+/* --- Resolve a payment session with Graphql --- */
+const resolvePaymentSession = function (ctx, shop, gid, kind) {
+  return new Promise(function (resolve, reject) {
+    const variables = {
+      "id": `${gid}`
+    };
+    let p1 = '';
+    let p2 = '';
+    if (kind == 'authorization') {
+      variables.authorizationExpiresAt = getAuthExpired();
+      p1 = ', $authorizationExpiresAt: DateTime';
+      p2 = ', authorizationExpiresAt: $authorizationExpiresAt';
+    }
+    callGraphql(ctx, shop, `mutation paymentSessionResolve($id: ID!${p1}) {
+            paymentSessionResolve(id: $id${p2}) {
+              paymentSession {
+                id
+                status {
+                  code
+                }
+              nextAction {
+                action
+                context {
+                  ... on PaymentSessionActionsRedirect {
+                    redirectUrl
+                  }
+                }
+              }
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (r) {
+      return resolve(r);
+    }).catch(function (e) {
+      console.log(`${e}`);
+      return reject(e);
+    });
+  });
+};
+
+/* --- Reject a payment session with Graphql --- */
+const rejectPaymentSession = function (ctx, shop, gid, error) {
+  return new Promise(function (resolve, reject) {
+    callGraphql(ctx, shop, `mutation PaymentSessionReject($id: ID!, $reason: PaymentSessionRejectionReasonInput!) {
+      paymentSessionReject(id: $id, reason: $reason) {
+        paymentSession {
+          id
+          status {
+            code
+          }
+          nextAction {
+            action
+            context {
+              ... on PaymentSessionActionsRedirect {
+                redirectUrl
+              }
+           }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${gid}`,
+      "reason": {
+        "code": "PROCESSING_ERROR",
+        "merchantMessage": `${error}`
+      }
+    }).then(function (r) {
+      return resolve(r);
+    }).catch(function (e) {
+      console.log(`${e}`);
+      return reject(e);
+    });
+  });
+};
 
 /* 
  * 
