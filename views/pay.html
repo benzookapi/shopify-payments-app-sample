@@ -10,12 +10,12 @@
     <div style="margin-left: auto; margin-right: auto; width: 50%; text-align: center;">
         <h1>My paymnents app buyer page</h1>
         <div>Payment session body:
-           <pre><%= JSON.stringify(body, null, 2) %></pre> 
+           <pre style="text-align: center;"><%= JSON.stringify(body, null, 2) %></pre> 
         </div>
         <br/>
-        <div>My key:<%= my_key %></div>
+        <div>My key: <%= my_key %></div>
         <br/>
-        <div>Choose a action:
+        <div>Choose your action:
             <select id="action">
                 <option value="resolve">Resolve</option>
                 <option value="pending">Pending</option>
