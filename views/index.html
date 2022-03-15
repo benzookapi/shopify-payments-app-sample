@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>My_Payment _App</title>
+  <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@5.0.0/dist/styles.css" />
+</head>
+
+<body>
+  <div style=" display: flex; justify-content: center; align-items: center;">
+    <div>My key (Your configuration data):<input id="my_key" type="text" value="<%= my_key %>"></div>
+    <div></div>
+    <div><button id="save">Save</button></div>
+    <div><button id="cancel">Cancel</button></div>
+  </div>
+  <script>
+    const save = function () {
+      window.location.href = `/configure?action=save&token=<%= token %>&my_key=${document.getElementById('my_key').value}`;
+    };
+    document.getElementById('save').addEventListener('click', save);
+
+    const cancel = function () {
+      window.location.href = `/configure?action=cancel&token=<%= token %>`;
+    };
+    document.getElementById('cancel').addEventListener('click', cancel);
+  </script>
+</body>
+
+</html>

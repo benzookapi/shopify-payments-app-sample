@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@5.0.0/dist/styles.css" />
+</head>
+<title>Pay</title>
+
+<body>
+    <div style=" display: flex; justify-content: center; align-items: center;">
+        <div>Payment session body:</div>
+        <div>
+            <%= JSON.stringify(body) %>
+        </div>
+        <div>My key (Your configuration data):</div>
+        <div>
+            <%= my_key %>
+        </div>
+        <div>Choose a action:</div>
+        <div>
+            <select id="action">
+                <option value="resolve">Resolve</option>
+                <option value="pending">Pending</option>
+                <option value="reject">Reject</option>
+            </select>
+        </div>
+        <div>Error message (for "Reject" only):</div>
+        <div><input id="error" type="text" value=""></div>
+        <div></div>
+        <div><button id="process">Process</button></div>
+        <div><button id="cancel">Cancel</button></div>
+    </div>
+
+    <script>
+        const process = function () {
+            const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
+            window.location.href = `/process?action=${action}&token=<%= token %>&error=${document.getElementById('error').value}`;
+        };
+        document.getElementById('process').addEventListener('click', process);
+
+        const cancel = function () {
+            window.location.href = `<%= cancel_url %>`;
+        };
+        document.getElementById('cancel').addEventListener('click', cancel);        
+    </script>
+</body>
+
+</html>
