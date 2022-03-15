@@ -10,7 +10,7 @@
     <div style="margin-left: auto; margin-right: auto; width: 50%; text-align: center;">
         <h1>My paymnents app buyer page</h1>
         <div>Payment session body:
-           <p><%= JSON.stringify(body, null, 2).replace(/ /g, "&nbsp;") %></p> 
+           <pre><%= JSON.stringify(body, null, 2) %></pre> 
         </div>
         <br/>
         <div>My key:<%= my_key %></div>
