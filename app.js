@@ -63,7 +63,8 @@ const JWT_SECRET = `${process.env.SHOPIFY_JWT_SECRET}`;
 router.get('/', async (ctx, next) => {
   console.log("+++++++++++++++ / +++++++++++++++");
   if (!checkSignature(ctx.request.query)) {
-    ctx.status = 400;
+    //ctx.status = 400;
+    ctx.body = "90";
     return;
   }
 
