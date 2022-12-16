@@ -64,7 +64,7 @@ router.get('/', async (ctx, next) => {
   console.log("+++++++++++++++ / +++++++++++++++");
   if (!checkSignature(ctx.request.query)) {
     //ctx.status = 400;
-    ctx.body = "90";
+    ctx.body = {"value": "90"};
     return;
   }
 
