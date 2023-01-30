@@ -318,6 +318,7 @@ router.get('/process', async (ctx, next) => {
           id
           state {
             ... on PaymentSessionStatePending {
+              code
               reason
             }
           }
@@ -386,8 +387,9 @@ router.post('/refund', async (ctx, next) => {
       refundSession {
         id
         state {
-          code
-          reason
+          ... on PaymentSessionStateResolved {
+            code
+          }
         }
       }
       userErrors {
@@ -405,8 +407,11 @@ router.post('/refund', async (ctx, next) => {
       refundSession {
         id
          state {
-          code
-          reason
+          ... on PaymentSessionStateRejected {
+            code
+            merchantMessage
+            reason
+          }
         }
       }
       userErrors {
@@ -586,8 +591,9 @@ const resolvePaymentSession = function (ctx, shop, gid, kind) {
               paymentSession {
                 id
                 state {
-                  code
-                  reason
+                  ... on PaymentSessionStateResolved {
+                    code
+                  }
                 }
               nextAction {
                 action
@@ -620,8 +626,11 @@ const rejectPaymentSession = function (ctx, shop, gid, error) {
         paymentSession {
           id
           state {
-            code
-            reason
+            ... on PaymentSessionStateRejected {
+              code
+              merchantMessage
+              reason
+            }
           }
           nextAction {
             action
