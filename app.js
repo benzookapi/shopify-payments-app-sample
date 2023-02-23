@@ -572,6 +572,17 @@ router.get('/pendingcomplete', async (ctx, next) => {
 
 });
 
+/* --- Raise a dummy system failure --- */
+router.get('/failure', async (ctx, next) => {
+  console.log("+++++++++++++++ /failure +++++++++++++++");
+  console.log(`+++ query +++ ${JSON.stringify(ctx.request.query)}`);
+  const msg = `You should try /process?action=${ctx.request.query.action}&token=${ctx.request.query.token}  later for testing recovery...`;
+  console.log(msg);
+  ctx.status = 500;
+  ctx.body = msg;
+
+});
+
 /* --- Resolve a payment session with Graphql --- */
 const resolvePaymentSession = function (ctx, shop, gid, kind) {
   return new Promise(function (resolve, reject) {
@@ -753,7 +764,7 @@ const checkWebhookSignature = function (ctx, secret) {
 
 /* --- Create JWT to pass data encoded through URL access --- */
 const createJWT = function (json) {
-  return jwt.sign(json, JWT_SECRET, { expiresIn: '1h' });
+  return jwt.sign(json, JWT_SECRET, { expiresIn: '7d' });
 };
 
 /* --- Decode JWT passed through URL access --- */
