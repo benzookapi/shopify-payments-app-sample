@@ -41,8 +41,8 @@
     </div>
 
     <script>
-        const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
         const process = function () {
+            const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
             window.location.href = `/process?action=${action}&token=<%= token %>&error=${document.getElementById('error').value}`;
         };
         document.getElementById('process').addEventListener('click', process);
@@ -52,6 +52,7 @@
         };
         document.getElementById('cancel').addEventListener('click', cancel);
         const failure = function () {
+            const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
             window.location.href = `/failure?action=${action}&token=<%= token %>`;
         };
         document.getElementById('failure').addEventListener('click', failure);         
