@@ -576,7 +576,7 @@ router.get('/pendingcomplete', async (ctx, next) => {
 router.get('/failure', async (ctx, next) => {
   console.log("+++++++++++++++ /failure +++++++++++++++");
   console.log(`+++ query +++ ${JSON.stringify(ctx.request.query)}`);
-  const msg = `You should try https://${ctx.request.host}}/process?action=${ctx.request.query.action}&token=${ctx.request.query.token}  later for testing recovery... (Current timestamp: ${new Date().toISOString()})`;
+  const msg = `You should try https://${ctx.request.host}/process?action=${ctx.request.query.action}&token=${ctx.request.query.token}  later for testing recovery... (Current timestamp: ${new Date().toISOString()})`;
   console.log(msg);
   ctx.status = 500;
   ctx.body = msg;
