@@ -288,6 +288,7 @@ router.get('/process', async (ctx, next) => {
   const kind = data.kind;
 
   const action = ctx.request.query.action;
+  const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
   if (action == 'resolve') {
@@ -349,7 +350,7 @@ router.get('/process', async (ctx, next) => {
 
   } else if (action == 'reject') {
 
-    await rejectPaymentSession(ctx, shop, gid, error).then(function (api_res) {
+    await rejectPaymentSession(ctx, shop, gid, code, error).then(function (api_res) {
       if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
         ctx.status = 500;
         ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
@@ -543,6 +544,7 @@ router.get('/pendingcomplete', async (ctx, next) => {
   const kind = ctx.request.query.kind;
 
   const action = ctx.request.query.action;
+  const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
   if (action == 'resolve') {
@@ -557,7 +559,7 @@ router.get('/pendingcomplete', async (ctx, next) => {
 
   } else if (action == 'reject') {
 
-    await rejectPaymentSession(ctx, shop, gid, error).then(function (api_res) {
+    await rejectPaymentSession(ctx, shop, gid, code, error).then(function (api_res) {
       ctx.body = `${JSON.stringify(api_res.data, null, 2)}`;
       return;
     }).catch(function (e) {
@@ -629,7 +631,7 @@ const resolvePaymentSession = function (ctx, shop, gid, kind) {
 };
 
 /* --- Reject a payment session with Graphql --- */
-const rejectPaymentSession = function (ctx, shop, gid, error) {
+const rejectPaymentSession = function (ctx, shop, gid, code, error) {
   return new Promise(function (resolve, reject) {
     callGraphql(ctx, shop, `mutation PaymentSessionReject($id: ID!, $reason: PaymentSessionRejectionReasonInput!) {
       paymentSessionReject(id: $id, reason: $reason) {
@@ -659,7 +661,7 @@ const rejectPaymentSession = function (ctx, shop, gid, error) {
     }`, null, GRAPHQL_PATH_PAYMENT, {
       "id": `${gid}`,
       "reason": {
-        "code": "PROCESSING_ERROR",
+        "code": `${code}`,
         "merchantMessage": `${error}`
       }
     }).then(function (r) {

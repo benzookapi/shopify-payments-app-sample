@@ -31,7 +31,24 @@
             </select>
         </div>
         <br />
-        <div>Error message (for "Reject" only):<input id="error" type="text" value=""></div>
+        <div>Error code (for "Reject" only):<select id="code">
+                <option value="PROCESSING_ERROR">PROCESSING_ERROR</option>
+                <option value="RISKY">RISKY</option>
+                <option value="AUTHENTICATION_REJECTED">AUTHENTICATION_REJECTED</option>
+                <option value="CARD_DECLINED">CARD_DECLINED</option>
+                <option value="CONFIRMATION_REJECTED">CONFIRMATION_REJECTED</option>
+                <option value="EXPIRED_CARD">EXPIRED_CARD</option>
+                <option value="INCORRECT_ADDRESS">INCORRECT_ADDRESS</option>
+                <option value="INCORRECT_CVC">INCORRECT_CVC</option>
+                <option value="INCORRECT_NUMBER">INCORRECT_NUMBER</option>
+                <option value="INCORRECT_PIN">INCORRECT_PIN</option>
+                <option value="INCORRECT_ZIP">INCORRECT_ZIP</option>
+                <option value="INVALID_CVC">INVALID_CVC</option>
+                <option value="INVALID_EXPIRY_DATE">INVALID_EXPIRY_DATE</option>
+                <option value="INVALID_NUMBER">INVALID_NUMBER</option>
+            </select></div>
+        <br />
+        <div>Error message (for "Reject" only):<input id="error" type="text" value="Your Error Message"></div>
         <br />
         <br />
         <div><button id="process">Process</button>&nbsp;&nbsp;<button id="cancel">Cancel</button></div>
@@ -43,7 +60,8 @@
     <script>
         const process = function () {
             const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
-            window.location.href = `/process?action=${action}&token=<%= token %>&error=${document.getElementById('error').value}`;
+            const code = document.getElementById('code').options[document.getElementById('code').selectedIndex].value;
+            window.location.href = `/process?action=${action}&token=<%= token %>&code=${code}&error=${document.getElementById('error').value}`;
         };
         document.getElementById('process').addEventListener('click', process);
 
