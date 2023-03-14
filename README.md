@@ -36,10 +36,13 @@ customers/redact:  /webhookgdprcustomerdel
 
 shop/redact:  /webhookgdprshopdel
 
-# How to complete pending sessions 
+# How to complete pending (or system error) sessions 
 Use the following link.
 
 YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT
+
+# TIPS
+If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
 
 
 

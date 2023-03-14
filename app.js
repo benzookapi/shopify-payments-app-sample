@@ -226,6 +226,14 @@ router.post('/payment', async (ctx, next) => {
   //const request_id = ctx.headers["shopify-request-id"];
   //const version = ctx.headers["shopify-api-version"];   
 
+  const given_name = ctx.request.body.customer.shipping_address.given_name;
+
+  if (given_name == '500' || given_name == '400' || given_name == '404' || given_name == '405') {
+    ctx.body = "Simulated error";
+    ctx.status = parseInt(given_name);
+    return;
+  }
+
   ctx.body = {
     "redirect_url": `https://${ctx.request.hostname}/pay?token=${createJWT({
       "headers": ctx.headers,
