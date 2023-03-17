@@ -237,14 +237,15 @@ router.post('/payment', async (ctx, next) => {
 
   if (family_name.indexOf('delay-') != -1) {
     const time = parseInt(family_name.replace('delay-', ''));
-    //const delay = () => { return new Promise((r) => { setTimeout(r, time * 1000) }) };
+    ctx.request.socket.setTimeout(time * 2000);
+    const delay = () => { return new Promise((r) => { setTimeout(r, time * 1000) }) };
     console.log(`Starting a ${time} seconds delay...`);
-    //await delay();
-    const now = Date.now();
+    await delay();
+    /*const now = Date.now();
     let temp = null;
     do {
       temp = Date.now();
-    } while (temp - now < time * 1000);
+    } while (temp - now < time * 1000);*/
     console.log(`The delay ended.`);
   }
 
