@@ -227,11 +227,25 @@ router.post('/payment', async (ctx, next) => {
   //const version = ctx.headers["shopify-api-version"];   
 
   const given_name = ctx.request.body.customer.shipping_address.given_name;
+  const family_name = ctx.request.body.customer.shipping_address.family_name;
 
   if (given_name == '500' || given_name == '400' || given_name == '404' || given_name == '405') {
     ctx.body = "Simulated error";
     ctx.status = parseInt(given_name);
     return;
+  }
+
+  if (family_name.indexOf('delay-') != -1) {
+    const time = parseInt(family_name.replace('delay-', ''));
+    //const delay = () => { return new Promise((r) => { setTimeout(r, time * 1000) }) };
+    console.log(`Starting a ${time} seconds delay...`);
+    //await delay();
+    const now = Date.now();
+    let temp = null;
+    do {
+      temp = Date.now();
+    } while (temp - now < time * 1000);
+    console.log(`The delay ended.`);
   }
 
   ctx.body = {
