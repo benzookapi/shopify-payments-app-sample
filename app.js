@@ -315,10 +315,11 @@ router.get('/process', async (ctx, next) => {
   const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
-  /* --- Do your payment process here --- */
+  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
   /* do {
      //...
    } while (true); */
+  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
 
   if (action == 'resolve' || action == 'pending') {
     // Inserting the group data for preventing duplicated payments for a single order. 
