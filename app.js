@@ -55,6 +55,7 @@ const HMAC_SECRET = API_SECRET;
 const MONGO_URL = `${process.env.SHOPIFY_MONGO_URL}`;
 const MONGO_DB_NAME = `${process.env.SHOPIFY_MONGO_DB_NAME}`;
 const MONGO_COLLECTION = 'shops';
+const MONGO_COLLECTION_GROUP = 'groups';
 
 // JWT token secret
 const JWT_SECRET = `${process.env.SHOPIFY_JWT_SECRET}`;
@@ -314,8 +315,20 @@ router.get('/process', async (ctx, next) => {
   const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
+  if (action == 'resolve' || action == 'pending') {
+    // Inserting the group data for preventing duplicated payments for a single order. 
+    // The group is a unique key of the database, so this insertion checks the duplication too
+    // (if the duplicated group comes, this insertion fails to return the error).
+    try {
+      await insertDB(data.group, { "gid": gid }, MONGO_COLLECTION_GROUP);
+    } catch (e) {
+      console.log(e);
+      ctx.body = "The duplicated payment was blocked, go back to Shopify and try again.";
+      ctx.status = 500;
+      return;
+    }
+  }
   if (action == 'resolve') {
-
     await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
       if (typeof api_res.data.paymentSessionResolve.userErrors !== UNDEFINED && api_res.data.paymentSessionResolve.userErrors.length > 0) {
         ctx.status = 500;
@@ -329,7 +342,6 @@ router.get('/process', async (ctx, next) => {
     });
 
   } else if (action == 'pending') {
-
     const variables = {
       "id": `${gid}`,
       "pendingExpiresAt": getAuthExpired(),
