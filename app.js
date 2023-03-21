@@ -315,6 +315,11 @@ router.get('/process', async (ctx, next) => {
   const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
+  /* --- Do your payment process here --- */
+  /* do {
+     //...
+   } while (true); */
+
   if (action == 'resolve' || action == 'pending') {
     // Inserting the group data for preventing duplicated payments for a single order. 
     // The group is a unique key of the database, so this insertion checks the duplication too
@@ -327,6 +332,7 @@ router.get('/process', async (ctx, next) => {
       ctx.status = 500;
       return;
     }
+    // If the insertion gets successful, it can be used for retrying later for safe recovery.
   }
   if (action == 'resolve') {
     await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
@@ -335,6 +341,8 @@ router.get('/process', async (ctx, next) => {
         ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
         return;
       }
+      // Set the payment status to be removed from the recovery targets.
+      setDB(data.group, { "gid": gid, "status": "resolved" }, MONGO_COLLECTION_GROUP);
       return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
@@ -377,6 +385,8 @@ router.get('/process', async (ctx, next) => {
         ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
         return;
       }
+      // Set the payment status to be removed from the recovery targets.
+      setDB(data.group, { "gid": gid, "status": "pending" }, MONGO_COLLECTION_GROUP);
       return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
