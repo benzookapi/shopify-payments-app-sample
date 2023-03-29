@@ -318,12 +318,6 @@ router.get('/process', async (ctx, next) => {
   const code = ctx.request.query.code;
   const error = ctx.request.query.error;
 
-  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
-  /* do {
-     //...
-   } while (true); */
-  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
-
   if (action == 'resolve' || action == 'pending') {
     // Duplication check for the same group.
     const group_data = await (getDB(data.group, MONGO_COLLECTION_GROUP));
@@ -353,6 +347,11 @@ router.get('/process', async (ctx, next) => {
       return;
     }
   }
+  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
+  /* do {
+     //...
+   } while (true); */
+  /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
   if (action == 'resolve') {
     await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
       if (typeof api_res.data.paymentSessionResolve.userErrors !== UNDEFINED && api_res.data.paymentSessionResolve.userErrors.length > 0) {
