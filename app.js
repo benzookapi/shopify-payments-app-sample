@@ -227,9 +227,12 @@ router.post('/payment', async (ctx, next) => {
   //const request_id = ctx.headers["shopify-request-id"];
   //const version = ctx.headers["shopify-api-version"];   
 
-  const given_name = ctx.request.body.customer.shipping_address.given_name;
-  const family_name = ctx.request.body.customer.shipping_address.family_name;
-
+  let given_name = '';
+  let family_name = '';
+  if (typeof ctx.request.body.customer.shipping_address !== UNDEFINED) {
+    given_name = ctx.request.body.customer.shipping_address.given_name;
+    family_name = ctx.request.body.customer.shipping_address.family_name;
+  }
   if (given_name == '500' || given_name == '400' || given_name == '404' || given_name == '405') {
     ctx.body = "Simulated error";
     ctx.status = parseInt(given_name);
@@ -322,31 +325,31 @@ router.get('/process', async (ctx, next) => {
   /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
 
   if (action == 'resolve' || action == 'pending') {
-    try {
-      const group_data = await (getDB(data.group, MONGO_COLLECTION_GROUP));
-      if (group_data != null) {
-        console.log(`The earlier payment ${group_data.gid} found in the group ${data.group}, now rejecting it to apply the last one.`);
+    // Duplication check for the same group.
+    const group_data = await (getDB(data.group, MONGO_COLLECTION_GROUP));
+    if (group_data != null) {
+      console.log(`****** A duplicated payment ${JSON.stringify(group_data)} found ******`);
+      if (group_data.status == 'resolved') {
+        //if the current payament is completed, do nothing.
+        ctx.status = 500;
+        ctx.body = `This group has been paid with ${group_data.gid}, go back to Shopify and try again.`;
+        return;
+      } else {
+        // If other = not muted or pending, try to reject the current payment to replace with the latest one.
         await rejectPaymentSession(ctx, shop, group_data.gid, 'PROCESSING_ERROR', 'Duplicated group payment').then(function (api_res) {
-          //if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
-          // Do nothing
-          //} else {
+          // Delete the group cache to retry the payment.
           return deleteDB(data.group, MONGO_COLLECTION_GROUP);
-          //}
         }).catch(function (e) {
           console.log(`${e}`);
         });
       }
-    } catch (e) {
-      console.log(`${e}`);
     }
-    // Inserting the group data for preventing duplicated payments for a single order. 
-    // The group is a unique key of the database, so this insertion checks the duplication too
-    // (if the duplicated group comes, this insertion fails to return the error).   
     try {
-      await (insertDB(data.group, { "gid": gid }, MONGO_COLLECTION_GROUP));
+      // Insert the latest group cache as a unique key (if it's duplicated, this insertion fails).
+      await insertDB(data.group, { "gid": gid, "action": action, "status": "" }, MONGO_COLLECTION_GROUP);
     } catch (e) {
       ctx.status = 500;
-      ctx.body = `${e}`;
+      ctx.body = `The duplicated payments were attempted, go back to Shopify and try again.`;
       return;
     }
   }
@@ -354,67 +357,35 @@ router.get('/process', async (ctx, next) => {
     await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
       if (typeof api_res.data.paymentSessionResolve.userErrors !== UNDEFINED && api_res.data.paymentSessionResolve.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionResolve.userErrors[0])}`;
+        ctx.body = `The payment ${gid} was not resolved with the error: ${JSON.stringify(api_res.data.paymentSessionResolve.userErrors[0])}`;
         return;
       }
-      // Set the payment status to be removed from the recovery targets.
-      setDB(data.group, { "gid": gid, "status": "resolved" }, MONGO_COLLECTION_GROUP);
+      // Set the payment status to the group cache.
+      setDB(data.group, { "gid": gid, "action": action, "status": "resolved" }, MONGO_COLLECTION_GROUP);
       return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
       return;
     });
-
   } else if (action == 'pending') {
-    const variables = {
-      "id": `${gid}`,
-      "pendingExpiresAt": getAuthExpired(),
-      "reason": "BUYER_ACTION_REQUIRED"
-    };
-    await callGraphql(ctx, shop, `mutation PaymentSessionPending($id: ID!, $pendingExpiresAt: DateTime!, $reason: PaymentSessionStatePendingReason!) {
-      paymentSessionPending(id: $id, pendingExpiresAt: $pendingExpiresAt, reason: $reason) {
-        paymentSession {
-          id
-          state {
-            ... on PaymentSessionStatePending {
-              code
-              reason
-            }
-          }
-          nextAction {
-            action
-            context {
-              ... on PaymentSessionActionsRedirect {
-                redirectUrl
-              }
-            }
-          }
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (api_res) {
+    await setPendingPaymentSession(ctx, shop, gid).then(function (api_res) {
       if (typeof api_res.data.paymentSessionPending.userErrors !== UNDEFINED && api_res.data.paymentSessionPending.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionPending.userErrors[0])}`;
+        ctx.body = `The payment ${gid} was not set pending with the error: ${JSON.stringify(api_res.data.paymentSessionPending.userErrors[0])}`;
         return;
       }
-      // Set the payment status to be removed from the recovery targets.
-      setDB(data.group, { "gid": gid, "status": "pending" }, MONGO_COLLECTION_GROUP);
+      // Set the payment status to the group cache.
+      setDB(data.group, { "gid": gid, "action": action, "status": "pending" }, MONGO_COLLECTION_GROUP);
       return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
       return;
     });
-
   } else if (action == 'reject') {
-
     await rejectPaymentSession(ctx, shop, gid, code, error).then(function (api_res) {
       if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionReject.userErrors[0])}`;
+        ctx.body = `The payment ${gid} was not rejected with the error: ${JSON.stringify(api_res.data.paymentSessionReject.userErrors[0])}`;
         return;
       }
       return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
@@ -422,7 +393,6 @@ router.get('/process', async (ctx, next) => {
       ctx.status = 500;
       return;
     });
-
   } else {
     ctx.status = 400;
     return;
@@ -683,6 +653,46 @@ const resolvePaymentSession = function (ctx, shop, gid, kind) {
               }
             }
           }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (r) {
+      return resolve(r);
+    }).catch(function (e) {
+      console.log(`${e}`);
+      return reject(e);
+    });
+  });
+};
+
+/* --- Set a payment session pending with Graphql --- */
+const setPendingPaymentSession = function (ctx, shop, gid) {
+  return new Promise(function (resolve, reject) {
+    callGraphql(ctx, shop, `mutation PaymentSessionPending($id: ID!, $pendingExpiresAt: DateTime!, $reason: PaymentSessionStatePendingReason!) {
+      paymentSessionPending(id: $id, pendingExpiresAt: $pendingExpiresAt, reason: $reason) {
+        paymentSession {
+          id
+          state {
+            ... on PaymentSessionStatePending {
+              code
+              reason
+            }
+          }
+          nextAction {
+            action
+            context {
+              ... on PaymentSessionActionsRedirect {
+                redirectUrl
+              }
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${gid}`,
+      "pendingExpiresAt": getAuthExpired(),
+      "reason": "BUYER_ACTION_REQUIRED"
+    }).then(function (r) {
       return resolve(r);
     }).catch(function (e) {
       console.log(`${e}`);

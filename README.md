@@ -36,7 +36,7 @@ customers/redact:  /webhookgdprcustomerdel
 
 shop/redact:  /webhookgdprshopdel
 
-# How to complete pending (or system error) sessions 
+# How to complete pending sessions 
 Use the following link.
 
 YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT
