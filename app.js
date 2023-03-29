@@ -322,24 +322,39 @@ router.get('/process', async (ctx, next) => {
   /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
 
   if (action == 'resolve' || action == 'pending') {
+    try {
+      const group_data = await (getDB(data.group, MONGO_COLLECTION_GROUP));
+      if (group_data != null) {
+        console.log(`The earlier payment ${group_data.gid} found in the group ${data.group}, now rejecting it to apply the last one.`);
+        await rejectPaymentSession(ctx, shop, group_data.gid, 'PROCESSING_ERROR', 'Duplicated group payment').then(function (api_res) {
+          //if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
+          // Do nothing
+          //} else {
+          return deleteDB(data.group, MONGO_COLLECTION_GROUP);
+          //}
+        }).catch(function (e) {
+          console.log(`${e}`);
+        });
+      }
+    } catch (e) {
+      console.log(`${e}`);
+    }
     // Inserting the group data for preventing duplicated payments for a single order. 
     // The group is a unique key of the database, so this insertion checks the duplication too
-    // (if the duplicated group comes, this insertion fails to return the error).
+    // (if the duplicated group comes, this insertion fails to return the error).   
     try {
-      await insertDB(data.group, { "gid": gid }, MONGO_COLLECTION_GROUP);
+      await (insertDB(data.group, { "gid": gid }, MONGO_COLLECTION_GROUP));
     } catch (e) {
-      console.log(e);
-      ctx.body = "The duplicated payment was blocked, go back to Shopify and try again.";
       ctx.status = 500;
+      ctx.body = `${e}`;
       return;
     }
-    // If the insertion gets successful, it can be used for retrying later for safe recovery.
   }
   if (action == 'resolve') {
     await resolvePaymentSession(ctx, shop, gid, kind).then(function (api_res) {
       if (typeof api_res.data.paymentSessionResolve.userErrors !== UNDEFINED && api_res.data.paymentSessionResolve.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
+        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionResolve.userErrors[0])}`;
         return;
       }
       // Set the payment status to be removed from the recovery targets.
@@ -383,7 +398,7 @@ router.get('/process', async (ctx, next) => {
     }`, null, GRAPHQL_PATH_PAYMENT, variables).then(function (api_res) {
       if (typeof api_res.data.paymentSessionPending.userErrors !== UNDEFINED && api_res.data.paymentSessionPending.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
+        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionPending.userErrors[0])}`;
         return;
       }
       // Set the payment status to be removed from the recovery targets.
@@ -399,7 +414,7 @@ router.get('/process', async (ctx, next) => {
     await rejectPaymentSession(ctx, shop, gid, code, error).then(function (api_res) {
       if (typeof api_res.data.paymentSessionReject.userErrors !== UNDEFINED && api_res.data.paymentSessionReject.userErrors.length > 0) {
         ctx.status = 500;
-        ctx.body = `Error: ${JSON.stringify(userErrors[0])}`;
+        ctx.body = `Error: ${JSON.stringify(api_res.data.paymentSessionReject.userErrors[0])}`;
         return;
       }
       return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
@@ -946,6 +961,28 @@ const setDB = function (key, data, collection = MONGO_COLLECTION) {
       });
     }).catch(function (e) {
       console.log(`setDB Error ${e}`);
+      return reject(e);
+    });
+  });
+};
+
+/* --- Delete Shopify data in database --- */
+const deleteDB = function (key, collection = MONGO_COLLECTION) {
+  return new Promise(function (resolve, reject) {
+    mongo.MongoClient.connect(MONGO_URL).then(function (db) {
+      //console.log(`setDB Connected ${MONGO_URL}`);
+      var dbo = db.db(MONGO_DB_NAME);
+      console.log(`deleteDB Used ${MONGO_DB_NAME} - ${collection}`);
+      console.log(`deleteDB deleteOne, _id:${key}`);
+      dbo.collection(collection).deleteOne({ "_id": `${key}` }).then(function (res) {
+        db.close();
+        return resolve(res);
+      }).catch(function (e) {
+        console.log(`deleteDB Error ${e}`);
+        return reject(e);
+      });
+    }).catch(function (e) {
+      console.log(`deleteDB Error ${e}`);
       return reject(e);
     });
   });
