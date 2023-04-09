@@ -411,51 +411,65 @@ router.post('/refund', async (ctx, next) => {
 
   const shop = ctx.headers["shopify-shop-domain"];
 
-  // Success: Resolve the refund
-  callGraphql(ctx, shop, `mutation RefundSessionResolve($id: ID!) {
-    refundSessionResolve(id: $id) {
-      refundSession {
-        id
-        state {
-          ... on PaymentSessionStateResolved {
-            code
-          }
-        }
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }`, null, GRAPHQL_PATH_PAYMENT, {
-    "id": `${ctx.request.body.gid}`
-  }).then(function (api_res) { }).catch(function (e) { });
+  const amount = parseInt(ctx.request.body.amount);
 
-  // Failure: Reject the refund
-  /*callGraphql(ctx, shop, `mutation RefundSessionReject($id: ID!, $reason: RefundSessionRejectionReasonInput!) {
-    refundSessionReject(id: $id, reason: $reason) {
-      refundSession {
-        id
-         state {
-          ... on PaymentSessionStateRejected {
-            code
-            merchantMessage
-            reason
+  // 999 is a magic number for reject simulation.
+  if (amount != 999) {
+    // Success: Resolve the refund
+    callGraphql(ctx, shop, `mutation RefundSessionResolve($id: ID!) {
+      refundSessionResolve(id: $id) {
+        refundSession {
+          id
+          state {
+            ... on RefundSessionStateResolved {
+             code
+            }
           }
         }
+        userErrors {
+          field
+          message
+        }
       }
-      userErrors {
-        field
-        message
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${ctx.request.body.gid}`
+    }).then(function (api_res) {
+
+    }).catch(function (e) {
+      // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+    });
+
+  } else {
+    // Failure: Reject the refund
+    callGraphql(ctx, shop, `mutation RefundSessionReject($id: ID!, $reason: RefundSessionRejectionReasonInput!) {
+      refundSessionReject(id: $id, reason: $reason) {
+       refundSession {
+          id
+           state {
+            ... on RefundSessionStateRejected {
+              code
+              merchantMessage
+              reason
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
       }
-    }
-  }`, null, GRAPHQL_PATH_PAYMENT, {
-    "id": `${ctx.request.body.gid}`,
-    "reason": {
-      "code": "PROCESSING_ERROR",
-      "merchantMessage": error
-    }
-  }).then(function (api_res) { }).catch(function (e) { });*/
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${ctx.request.body.gid}`,
+      "reason": {
+        "code": "PROCESSING_ERROR",
+        "merchantMessage": "Reject simulation"
+      }
+    }).then(function (api_res) {
+
+    }).catch(function (e) {
+      // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+    });
+  }
 
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;
@@ -473,41 +487,67 @@ router.post('/capture', async (ctx, next) => {
 
   const shop = ctx.headers["shopify-shop-domain"];
 
-  // Success: Resolve the payment capture
-  callGraphql(ctx, shop, `mutation CaptureSessionResolve($id: ID!) {
-    captureSessionResolve(id: $id) {
-      captureSession {
-        id
-      }
-      userErrors {
-        code
-        field
-        message
-      }
-    }
-  }`, null, GRAPHQL_PATH_PAYMENT, {
-    "id": `${ctx.request.body.gid}`
-  }).then(function (api_res) { }).catch(function (e) { });
+  const amount = parseInt(ctx.request.body.amount);
 
-  // Failure: Reject the payment capture
-  /*callGraphql(ctx, shop, `mutation CaptureSessionReject($id: ID!, $reason: CaptureSessionRejectionReasonInput!) {
-    captureSessionReject(id: $id, reason: $reason) {
-      captureSession {
-        id
+  // 999 is a magic number for reject simulation.
+  if (amount != 999) {
+    // Success: Resolve the payment capture
+    callGraphql(ctx, shop, `mutation CaptureSessionResolve($id: ID!) {
+      captureSessionResolve(id: $id) {
+        captureSession {
+          id
+          state {
+            ... on CaptureSessionStateResolved {
+              code
+            }
+          }
+        }
+        userErrors {
+          code
+          field
+          message
+        }
       }
-      userErrors {
-        code
-        field
-        message
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${ctx.request.body.gid}`
+    }).then(function (api_res) {
+
+    }).catch(function (e) {
+      // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+    });
+
+  } else {
+    // Failure: Reject the payment capture
+    callGraphql(ctx, shop, `mutation CaptureSessionReject($id: ID!, $reason: CaptureSessionRejectionReasonInput!) {
+      captureSessionReject(id: $id, reason: $reason) {
+        captureSession {
+          id
+          state {
+            ... on CaptureSessionStateRejected {
+              code
+              reason
+             merchantMessage
+            }
+          }
+        }
+        userErrors {
+          code
+          field
+          message
+        }
       }
-    }
-  }`, null, GRAPHQL_PATH_PAYMENT, {
-    "id": `${ctx.request.body.gid}`,
-    "reason": {
-      "code": "PROCESSING_ERROR",
-      "merchantMessage": error
-    }
-  }).then(function (api_res) { }).catch(function (e) { });*/
+    }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${ctx.request.body.gid}`,
+      "reason": {
+        "code": "PROCESSING_ERROR",
+        "merchantMessage": "Reject simulation"
+      }
+    }).then(function (api_res) {
+
+    }).catch(function (e) {
+      // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+    });
+  }
 
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;
@@ -528,29 +568,45 @@ router.post('/void', async (ctx, next) => {
   // Success: Resolve the void
   callGraphql(ctx, shop, `mutation VoidSessionResolve($id: ID!) {
     voidSessionResolve(id: $id) {
+      voidSession {
+        id
+        state {
+          ... on VoidSessionStateResolved {
+            code
+          }
+        }
+      }
       userErrors {
         code
         field
         message
-      }
-      voidSession {
-        id
       }
     }
   }`, null, GRAPHQL_PATH_PAYMENT, {
     "id": `${ctx.request.body.gid}`
-  }).then(function (api_res) { }).catch(function (e) { });
+  }).then(function (api_res) {
+
+  }).catch(function (e) {
+    // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+  });
 
   // Failure: Reject the void
   /*callGraphql(ctx, shop, `mutation VoidSessionReject($id: ID!, $reason: VoidSessionRejectionReasonInput!) {
     voidSessionReject(id: $id, reason: $reason) {
+      voidSession {
+        id
+        state {
+          ... on VoidSessionStateRejected {
+            code
+            reason
+            merchantMessage
+          }
+        }
+      }
       userErrors {
         code
         field
         message
-      }
-      voidSession {
-        id
       }
     }
   }`, null, GRAPHQL_PATH_PAYMENT, {
@@ -559,7 +615,11 @@ router.post('/void', async (ctx, next) => {
       "code": "PROCESSING_ERROR",
       "merchantMessage": error
     }
-  }).then(function (api_res) { }).catch(function (e) { });*/
+  }).then(function (api_res) { 
+
+  }).catch(function (e) { 
+    // Error responses like ctx.status = 500 doesn't work for notifying Shopify.
+  });*/
 
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;

@@ -46,6 +46,8 @@ If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in t
 
 If you input 'delay-XXX (XXX = nummeric like 10)' to customer's last name (family_name) in the shipping address, the app delay the response in that seconds to Shopify's session request body which produces an error or warning.
 
+If you refund / capture with the amount of 999, the app calls reject mutation for checking how the rejections work.
+
 # Best practice
 Use `group` in the payment session body to prevent from unexpected duplicated paymwents for a single order.
 https://shopify.dev/docs/apps/payments/implementation/process-an-offsite-payment
