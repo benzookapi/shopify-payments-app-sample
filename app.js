@@ -362,7 +362,12 @@ router.get('/process', async (ctx, next) => {
       }
       // Set the payment status to the group cache.
       setDB(data.group, { "gid": gid, "action": action, "status": "resolved" }, MONGO_COLLECTION_GROUP);
-      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
+      if (no_redirect) {
+        ctx.status = 500;
+        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+      } else {
+        return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
+      }
     }).catch(function (e) {
       ctx.status = 500;
       return;
@@ -376,7 +381,12 @@ router.get('/process', async (ctx, next) => {
       }
       // Set the payment status to the group cache.
       setDB(data.group, { "gid": gid, "action": action, "status": "pending" }, MONGO_COLLECTION_GROUP);
-      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
+      if (no_redirect) {
+        ctx.status = 500;
+        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+      } else {
+        return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
+      }
     }).catch(function (e) {
       ctx.status = 500;
       return;
@@ -388,7 +398,12 @@ router.get('/process', async (ctx, next) => {
         ctx.body = `The payment ${gid} was not rejected with the error: ${JSON.stringify(api_res.data.paymentSessionReject.userErrors[0])}`;
         return;
       }
-      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
+      if (no_redirect) {
+        ctx.status = 500;
+        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+      } else {
+        return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
+      }
     }).catch(function (e) {
       ctx.status = 500;
       return;
