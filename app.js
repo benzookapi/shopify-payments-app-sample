@@ -317,6 +317,7 @@ router.get('/process', async (ctx, next) => {
   const action = ctx.request.query.action;
   const code = ctx.request.query.code;
   const error = ctx.request.query.error;
+  const no_redirect = ctx.request.query.no_redirect === 'true' ? true : false;
 
   if (action == 'resolve' || action == 'pending') {
     // Duplication check for the same group.
@@ -361,7 +362,7 @@ router.get('/process', async (ctx, next) => {
       }
       // Set the payment status to the group cache.
       setDB(data.group, { "gid": gid, "action": action, "status": "resolved" }, MONGO_COLLECTION_GROUP);
-      return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
+      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
       return;
@@ -375,7 +376,7 @@ router.get('/process', async (ctx, next) => {
       }
       // Set the payment status to the group cache.
       setDB(data.group, { "gid": gid, "action": action, "status": "pending" }, MONGO_COLLECTION_GROUP);
-      return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
+      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
       return;
@@ -387,7 +388,7 @@ router.get('/process', async (ctx, next) => {
         ctx.body = `The payment ${gid} was not rejected with the error: ${JSON.stringify(api_res.data.paymentSessionReject.userErrors[0])}`;
         return;
       }
-      return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
+      if (!no_redirect) return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
     }).catch(function (e) {
       ctx.status = 500;
       return;

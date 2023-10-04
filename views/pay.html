@@ -51,6 +51,12 @@
         <div>Error message (for "Reject" only):<input id="error" type="text" value="Your Error Message"></div>
         <br />
         <br />
+        <div>
+            Simulate the thank you page redirection failure:<select id="no_redirect">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+            </select>
+        </div>
         <div><button id="process">Process</button>&nbsp;&nbsp;<button id="cancel">Cancel</button></div>
         <br />
         <br />
@@ -61,7 +67,8 @@
         const process = function () {
             const action = document.getElementById('action').options[document.getElementById('action').selectedIndex].value;
             const code = document.getElementById('code').options[document.getElementById('code').selectedIndex].value;
-            window.location.href = `/process?action=${action}&token=<%= token %>&code=${code}&error=${document.getElementById('error').value}`;
+            const no_redirect = document.getElementById('no_redirect').options[document.getElementById('no_redirect').selectedIndex].value;
+            window.location.href = `/process?action=${action}&token=<%= token %>&code=${code}&error=${document.getElementById('error').value}&no_redirect=${no_redirect}`;
         };
         document.getElementById('process').addEventListener('click', process);
 
