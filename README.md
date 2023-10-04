@@ -42,11 +42,13 @@ Use the following link.
 YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT
 
 # TIPS
-If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
+- If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
 
-If you input 'delay-XXX (XXX = nummeric like 10)' to customer's last name (family_name) in the shipping address, the app delay the response in that seconds to Shopify's session request body which produces an error or warning.
+- If you input 'delay-XXX (XXX = nummeric like 10)' to customer's last name (family_name) in the shipping address, the app delay the response in that seconds to Shopify's session request body which produces an error or warning.
 
-If you refund / capture with the amount of 999, the app calls reject mutation for checking how the rejections work.
+- If you refund / capture with the amount of 999, the app calls reject mutation for checking how the rejections work.
+
+- Even if your redirection to the Shopify thank you page **FAILS** for some reason (the buyer's network issue, etc.) but `PaymentSessionResolve / Pending` API can be executed successfully in your server, **Shopify makes the order with the status to send a thank you email to the buyer** (which means, you should **NOT** call those APIs before the buyer make a payment).
 
 # Best practice
 Use `group` in the payment session body to prevent from unexpected duplicated paymwents for a single order.

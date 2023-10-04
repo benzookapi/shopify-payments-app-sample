@@ -364,7 +364,7 @@ router.get('/process', async (ctx, next) => {
       setDB(data.group, { "gid": gid, "action": action, "status": "resolved" }, MONGO_COLLECTION_GROUP);
       if (no_redirect) {
         ctx.status = 500;
-        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+        ctx.body = `The redirection to the thank you page doesn't happen with 'no_redirect' set true.`;
       } else {
         return ctx.redirect(`${api_res.data.paymentSessionResolve.paymentSession.nextAction.context.redirectUrl}`);
       }
@@ -383,7 +383,7 @@ router.get('/process', async (ctx, next) => {
       setDB(data.group, { "gid": gid, "action": action, "status": "pending" }, MONGO_COLLECTION_GROUP);
       if (no_redirect) {
         ctx.status = 500;
-        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+        ctx.body = `The redirection to the thank you page doesn't happen with 'no_redirect' set true.`;
       } else {
         return ctx.redirect(`${api_res.data.paymentSessionPending.paymentSession.nextAction.context.redirectUrl}`);
       }
@@ -400,7 +400,7 @@ router.get('/process', async (ctx, next) => {
       }
       if (no_redirect) {
         ctx.status = 500;
-        ctx.body = `You specified no redirection to the thank you page. Go back to <a href="https://${shop}">your store</a> to check the result.`;
+        ctx.body = `The redirection to the thank you page doesn't happen with 'no_redirect' set true.`;
       } else {
         return ctx.redirect(`${api_res.data.paymentSessionReject.paymentSession.nextAction.context.redirectUrl}`);
       }
