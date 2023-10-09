@@ -5,7 +5,7 @@ SHOPIFY_API_KEY:              YOUR_API_KEY
 
 SHOPIFY_API_SECRET:           YOUR_API_SECRET
 
-SHOPIFY_API_VERSION:          2023-04
+SHOPIFY_API_VERSION:          2023-04 (or later)
 
 SHOPIFY_MONGO_DB_NAME:        YOUR_DB_NAME (any name is OK)
 
@@ -21,27 +21,27 @@ SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
 # Map your mTLS paths with payment session fields
 https://shopify.dev/apps/payments/creating-a-payments-app/creating-a-payments-app#payments-app-extension-configuration-fields
 
-Payment session URL: /payment
+Payment session URL: `YOUR_APP_URL/payment`
 
-Refund session URL: /refund
+Refund session URL: `YOUR_APP_URL/refund`
 
-Capture session URL: /capture
+Capture session URL: `YOUR_APP_URL/capture`
 
-Void session URL: /void
+Void session URL: `YOUR_APP_URL/void`
 
 # Map your webhook paths with GDRP webhooks
 https://shopify.dev/apps/webhooks/configuration/mandatory-webhooks
 
-customers/data_request:  /webhookgdprcustomerreq
+customers/data_request:  `YOUR_APP_URL/webhookgdprcustomerreq`
 
-customers/redact:  /webhookgdprcustomerdel
+customers/redact:  `YOUR_APP_URL/webhookgdprcustomerdel`
 
-shop/redact:  /webhookgdprshopdel
+shop/redact:  `YOUR_APP_URL/webhookgdprshopdel`
 
 # How to complete pending sessions 
 Use the following link.
 
-YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT
+`YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT`
 
 # TIPS
 - If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
