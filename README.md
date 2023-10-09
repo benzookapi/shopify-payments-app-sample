@@ -1,5 +1,5 @@
 # How to run
-Just pushing to heroku with the following system variables is the easiest way to run, or npm start locally maybe.
+Just deploy to Render or heroku or other Pass with the following environment variables is the easiest way to run, or `npm install && npm run start` locally.
 
 SHOPIFY_API_KEY:              YOUR_API_KEY
 
@@ -14,7 +14,9 @@ SHOPIFY_MONGO_URL:            mongodb://YOUR_ID:YOUR_PASSWORD@YOUR_DOMAIN:YOUR_P
 SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
 
 # Installation Endpoint
-`https://SHOPIFY_SHOP_DOMAIN/admin/oauth/authorize?client_id=YOUR_API_KEY&scope=write_payment_gateways,write_payment_sessions&redirect_uri=YOUR_APP_URL/callback&state=&grant_options[]=`　
+`https://SHOPIFY_SHOP_DOMAIN/admin/oauth/authorize?client_id=YOUR_API_KEY&scope=write_payment_gateways,write_payment_sessions&redirect_uri=YOUR_APP_URL/callback&state=&grant_options[]=`
+
+**Note that `YOUR_APP_URL` needs to be a public URL hosted by Render or other cloud plarforms or local tunnel URLs like Cloudflare tunnel or ngrok .**
 
 # Map your mTLS paths with payment session fields
 https://shopify.dev/apps/payments/creating-a-payments-app/creating-a-payments-app#payments-app-extension-configuration-fields
