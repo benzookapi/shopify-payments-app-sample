@@ -1,6 +1,6 @@
 # How to run
 Just deploy to Render or heroku or other Pass with the following environment variables is the easiest way to run, or `npm install && npm run start` locally.
-
+```
 SHOPIFY_API_KEY:              YOUR_API_KEY
 
 SHOPIFY_API_SECRET:           YOUR_API_SECRET
@@ -12,6 +12,7 @@ SHOPIFY_MONGO_DB_NAME:        YOUR_DB_NAME (any name is OK)
 SHOPIFY_MONGO_URL:            mongodb://YOUR_ID:YOUR_PASSWORD@YOUR_DOMAIN:YOUR_PORT/YOUR_DB_NAME
 
 SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
+```
 
 # Installation Endpoint
 `https://SHOPIFY_SHOP_DOMAIN/admin/oauth/authorize?client_id=YOUR_API_KEY&scope=write_payment_gateways,write_payment_sessions&redirect_uri=YOUR_APP_URL/callback&state=&grant_options[]=`
