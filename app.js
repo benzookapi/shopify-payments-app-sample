@@ -230,8 +230,8 @@ router.post('/payment', async (ctx, next) => {
   let given_name = '';
   let family_name = '';
   if (typeof ctx.request.body.customer.shipping_address !== UNDEFINED) {
-    given_name = ctx.request.body.customer.shipping_address.given_name;
-    family_name = ctx.request.body.customer.shipping_address.family_name;
+    given_name = typeof ctx.request.body.customer.shipping_address.given_name !== UNDEFINED ? ctx.request.body.customer.shipping_address.given_name : given_name;
+    family_name = typeof ctx.request.body.customer.shipping_address.family_name !== UNDEFINED ? ctx.request.body.customer.shipping_address.family_name : family_name;
   }
   if (given_name == '500' || given_name == '400' || given_name == '404' || given_name == '405') {
     ctx.body = "Simulated error";
