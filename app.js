@@ -253,20 +253,27 @@ router.post('/payment', async (ctx, next) => {
     console.log(`The delay ended.`);
   }
 
+  const token = createJWT({
+    "headers": ctx.headers,
+    "body": ctx.request.body,
+    "shop": shop
+  });
+
+  console.log(`+++ token +++ ${token}`);
+
   ctx.body = {
-    "redirect_url": `https://${ctx.request.hostname}/pay?token=${createJWT({
-      "headers": ctx.headers,
-      "body": ctx.request.body,
-      "shop": shop
-    })}`
+    "redirect_url": `https://${ctx.request.hostname}/pay/${token}`
   }
 });
 
-router.get('/pay', async (ctx, next) => {
+router.get('/pay/:token', async (ctx, next) => {
   console.log("+++++++++++++++ /pay +++++++++++++++");
-  console.log(`+++ query +++ ${JSON.stringify(ctx.request.query)}`);
+  console.log(`+++ request +++ ${JSON.stringify(ctx.request)}`);
 
-  const data = decodeJWT(ctx.request.query.token);
+  const token = ctx.request.url.split('/').slice(-1)[0];
+  console.log(`+++ token +++ ${token}`);
+
+  const data = decodeJWT(token);
   console.log(`+++ data +++ ${JSON.stringify(data)}`);
 
   const headers = data.headers;
