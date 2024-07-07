@@ -20,16 +20,11 @@ SHOPIFY_MONGO_URL:            mongodb://YOUR_ID:YOUR_PASSWORD@YOUR_DOMAIN:YOUR_P
 SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
 ```
 
-# Added 2024.07
+# Added in 2024.07
 The payment extension was migrated to CLI deployment, so you need to do [this migration steps](https://shopify.dev/docs/apps/build/payments/migrate-extensions-to-shopify-cli), too. For payment extension toml file details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Create version` button to `Release` the version to make it `active` (or run [release](https://shopify.dev/docs/api/shopify-cli/app/app-release) command in CLI).
 
-# Installation Endpoint
-`https://SHOPIFY_SHOP_DOMAIN/admin/oauth/authorize?client_id=YOUR_API_KEY&scope=write_payment_gateways,write_payment_sessions&redirect_uri=YOUR_APP_URL/callback&state=&grant_options[]=`
-
-**Note that `YOUR_APP_URL` needs to be a public URL hosted by Render or other cloud plarforms or local tunnel URLs like Cloudflare tunnel or ngrok .**
-
-# Map your mTLS paths with payment session fields in `extensions/my-test-pay-ext/shopify.extension.toml`
-https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli
+# Map your mTLS paths with payment session fields
+Specify the following URLs in `extensions/my-test-pay-ext/shopify.extension.toml` described in [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli).
 
 payment_session_url =  `YOUR_APP_URL/payment`
 
@@ -40,13 +35,18 @@ capture_session_url = `YOUR_APP_URL/capture`
 void_session_url = `YOUR_APP_URL/void`
 
 # Map your webhook paths with GDRP webhooks
-https://shopify.dev/apps/webhooks/configuration/mandatory-webhooks
+Confgiure your GDRP webhook end points following [this page](https://shopify.dev/apps/webhooks/configuration/mandatory-webhooks).
 
 customers/data_request:  `YOUR_APP_URL/webhookgdprcustomerreq`
 
 customers/redact:  `YOUR_APP_URL/webhookgdprcustomerdel`
 
 shop/redact:  `YOUR_APP_URL/webhookgdprshopdel`
+
+# Installation Endpoint
+`https://SHOPIFY_SHOP_DOMAIN/admin/oauth/authorize?client_id=YOUR_API_KEY&scope=write_payment_gateways,write_payment_sessions&redirect_uri=YOUR_APP_URL/callback&state=&grant_options[]=`
+
+**Note that `YOUR_APP_URL` needs to be a public URL hosted by Render or other cloud plarforms or local tunnel URLs like Cloudflare tunnel or ngrok .**
 
 # How to complete pending sessions 
 Use the following link.
