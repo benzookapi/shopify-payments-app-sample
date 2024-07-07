@@ -1,0 +1,21 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "e8a6b726b597db08a3b901676cddfb52"
+name = "MyTestPay"
+handle = "mypaymentapp2"
+application_url = "https://shopify-payments-app-sample.onrender.com/"
+embedded = true
+
+[auth]
+redirect_urls = [ "https://shopify-payments-app-sample.onrender.com/callback" ]
+
+[webhooks]
+api_version = "2024-07"
+
+  [webhooks.privacy_compliance]
+  customer_deletion_url = "https://shopify-payments-app-sample.onrender.com/webhookgdpr"
+  customer_data_request_url = "https://shopify-payments-app-sample.onrender.com/webhookgdpr"
+  shop_deletion_url = "https://shopify-payments-app-sample.onrender.com/webhookgdpr"
+
+[pos]
+embedded = false
