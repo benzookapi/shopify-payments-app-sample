@@ -21,7 +21,7 @@ SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
 ```
 
 # Added in 2024.07
-The payment extension was migrated to CLI deployment, so you need to do [this migration steps](https://shopify.dev/docs/apps/build/payments/migrate-extensions-to-shopify-cli), too. For payment extension toml file details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Create version` button to `Release` the version to make it `active` (or run [release](https://shopify.dev/docs/api/shopify-cli/app/app-release) command in CLI).
+The payment extension was migrated to CLI deployment, so you need to do [this migration steps](https://shopify.dev/docs/apps/build/payments/migrate-extensions-to-shopify-cli), too. For payment extension toml file details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Submit for review` in the latest version.
 
 # Map your mTLS paths with payment session fields
 Specify the following URLs in `extensions/my-test-pay-ext/shopify.extension.toml` described in [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli).
