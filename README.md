@@ -77,4 +77,3 @@ https://shopify.dev/docs/apps/payments/implementation/process-an-offsite-payment
 - You need to follow [Shopi API Licene and Terms of Use](https://www.shopify.com/legal/api-terms) even for custom app usage.
 - If you use this code for your production, **all resposibilties are owned by you**.
 
-
