@@ -78,4 +78,3 @@ https://shopify.dev/docs/apps/payments/implementation/process-an-offsite-payment
 - If you use this code for your production, **all resposibilties are owned by you**.
 
 
-
