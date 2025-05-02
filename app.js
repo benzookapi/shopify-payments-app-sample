@@ -355,6 +355,13 @@ router.get('/process', async (ctx, next) => {
       return;
     }
   }
+
+  confirmPaymentSession(ctx, shop, gid).then(function (api_res) {
+    console.log(`confirmPaymentSession ${JSON.stringify(api_res)}`);
+  }).catch(function (e) {
+
+  });
+
   /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
   /* do {
      //...
@@ -648,6 +655,22 @@ router.post('/void', async (ctx, next) => {
   ctx.status = 201;
 });
 
+/*
+ *
+ * --- mTLS handshake endpoint for refunding payment from Shopify ---
+ * 
+*/
+router.post('/confirm', async (ctx, next) => {
+  console.log("+++++++++++++++ /confirm +++++++++++++++");
+  console.log(`+++ headers +++ ${JSON.stringify(ctx.headers)}`);
+  console.log(`+++ body +++ ${JSON.stringify(ctx.request.body)}`);
+
+  const shop = ctx.headers["shopify-shop-domain"];
+
+  ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
+  ctx.status = 201;
+});
+
 router.get('/pendingcomplete', async (ctx, next) => {
   console.log("+++++++++++++++ /pendingcomplete +++++++++++++++");
   console.log(`+++ body +++ ${JSON.stringify(ctx.request.body)}`);
@@ -825,6 +848,45 @@ const rejectPaymentSession = function (ctx, shop, gid, code, error) {
     });
   });
 };
+
+/* --- Confirm a payment session with Graphql (overselling prevention) --- */
+const confirmPaymentSession = function (ctx, shop, gid) {
+  return new Promise(function (resolve, reject) {
+    callGraphql(ctx, shop, `mutation paymentSessionConfirm($id: ID!) {
+            paymentSessionConfirm(id: $id) {
+              paymentSession {
+                id
+                state {
+                  ... on PaymentSessionStateConfirming {
+                    code
+                  }
+                }
+              nextAction {
+                action
+                context {
+                  ... on PaymentSessionActionsRedirect {
+                    redirectUrl
+                  }
+                }
+              }
+              }
+              userErrors {
+                code
+                field
+                message
+              }
+            }
+          }`, null, GRAPHQL_PATH_PAYMENT, {
+      "id": `${gid}`
+    }).then(function (r) {
+      return resolve(r);
+    }).catch(function (e) {
+      console.log(`${e}`);
+      return reject(e);
+    });
+  });
+};
+
 
 /* 
  * 

@@ -127,5 +127,8 @@ supports_deferred_payments = false
 supports_installments = false
 multiple_capture = false
 
+supports_oversell_protection = true
+confirmation_callback_url = "https://shopify-payments-app-sample.onrender.com/confirm"
+
   [[extensions.targeting]]
   target = "payments.offsite.render"
