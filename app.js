@@ -388,7 +388,7 @@ router.get('/process', async (ctx, next) => {
 
     await checkResult()
       .then(result => {
-        console.log(`Result found: ${result}`);
+        console.log(`checkResult() - Result found: ${JSON.stringify(result)}`);
         if (typeof result.confirmation_result === UNDEFINED || result.confirmation_result == false) {
           ctx.status = 500;
           ctx.body = `The payment session cannot be proceeded with false confirmation like no inventory error.`;
