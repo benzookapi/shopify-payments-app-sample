@@ -56,6 +56,7 @@ const MONGO_URL = `${process.env.SHOPIFY_MONGO_URL}`;
 const MONGO_DB_NAME = `${process.env.SHOPIFY_MONGO_DB_NAME}`;
 const MONGO_COLLECTION = 'shops';
 const MONGO_COLLECTION_GROUP = 'groups';
+const MONGO_COLLECTION_SESSION = 'sessions';
 
 // JWT token secret
 const JWT_SECRET = `${process.env.SHOPIFY_JWT_SECRET}`;
@@ -356,11 +357,51 @@ router.get('/process', async (ctx, next) => {
     }
   }
 
-  confirmPaymentSession(ctx, shop, gid).then(function (api_res) {
-    console.log(`confirmPaymentSession ${JSON.stringify(api_res)}`);
-  }).catch(function (e) {
+  // Check the product inventory for overselling prevention.
+  // This needs extra approval from Shopify. 
+  // https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli?framework=remix#explore-confirm-sessions-(closed-beta)
+  const api_res = await confirmPaymentSession(ctx, shop, gid);
+  if (typeof api_res.data.paymentSessionConfirm.userErrors === UNDEFINED || api_res.data.paymentSessionConfirm.userErrors.length == 0) {
+    // Payment session is confirmed. Check the payment status from the cached DB set by the callback `/confirm`.
+    const checkResult = async () => {
+      const MAX_SECONDS = 10;
+      const MAX_WAIT_TIME = MAX_SECONDS * 1000;
+      const INTERVAL = 1000;
+      let elapsedTime = 0;
+      let session_data = null;
+      return new Promise((resolve, reject) => {
+        const intervalId = setInterval(async () => {
+          elapsedTime += INTERVAL;
 
-  });
+          session_data = await getDB(gid, MONGO_COLLECTION_SESSION);
+
+          if (session_data != null) {
+            clearInterval(intervalId);
+            resolve(session_data);
+          } else if (elapsedTime >= MAX_WAIT_TIME) {
+            clearInterval(intervalId);
+            reject(new Error(`Timeout: Payment session confirm result not found within ${MAX_SECONDS} seconds`));
+          }
+        }, INTERVAL);
+      });
+    };
+
+    await checkResult()
+      .then(result => {
+        console.log(`Result found: ${result}`);
+        if (typeof result.confirmation_result === UNDEFINED || result.confirmation_result == false) {
+          ctx.status = 500;
+          ctx.body = `The payment session cannot be proceeded with false confirmation like no inventory error.`;
+          return;
+        }
+      })
+      .catch(err => {
+        console.error(err.message);
+        ctx.status = 500;
+        ctx.body = `The payment session was not confirmed with the error: ${err.message}`;
+        return;
+      });
+  }
 
   /* ////////// DO YOUR PAYMENT PROCESS HERE ////////// */
   /* do {
@@ -660,12 +701,16 @@ router.post('/void', async (ctx, next) => {
  * --- mTLS handshake endpoint for refunding payment from Shopify ---
  * 
 */
+// https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli?framework=remix#explore-confirm-sessions-(closed-beta)
 router.post('/confirm', async (ctx, next) => {
   console.log("+++++++++++++++ /confirm +++++++++++++++");
   console.log(`+++ headers +++ ${JSON.stringify(ctx.headers)}`);
   console.log(`+++ body +++ ${JSON.stringify(ctx.request.body)}`);
 
   const shop = ctx.headers["shopify-shop-domain"];
+
+  // Set the payment session confirmation result to the session cache.
+  setDB(ctx.request.body.gid, ctx.request.body, MONGO_COLLECTION_SESSION);
 
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;
