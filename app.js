@@ -710,7 +710,7 @@ router.post('/confirm', async (ctx, next) => {
   const shop = ctx.headers["shopify-shop-domain"];
 
   // Set the payment session confirmation result to the session cache.
-  setDB(ctx.request.body.gid, ctx.request.body, MONGO_COLLECTION_SESSION);
+  insertDB(ctx.request.body.gid, ctx.request.body, MONGO_COLLECTION_SESSION);
 
   ctx.body = {}; // Shopify shows the error message unless this empty body is not sent.
   ctx.status = 201;
