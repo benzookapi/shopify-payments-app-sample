@@ -322,9 +322,11 @@ router.get('/process', async (ctx, next) => {
   const gid = data.gid;
   const kind = data.kind;
 
-  const action = ctx.request.query.action;
-  const code = ctx.request.query.code;
-  const error = ctx.request.query.error;
+  // These three are possible to be overridden by the following sesion confrimation.
+  let action = ctx.request.query.action;
+  let code = ctx.request.query.code;
+  let error = ctx.request.query.error;
+
   const no_redirect = ctx.request.query.no_redirect === 'true' ? true : false;
 
   if (action == 'resolve' || action == 'pending') {
@@ -385,21 +387,17 @@ router.get('/process', async (ctx, next) => {
         }, INTERVAL);
       });
     };
-
-    await checkResult()
+    // Overwrite the action, code and error with the session confirmation result.
+    [action, code, error] = await checkResult()
       .then(result => {
         console.log(`checkResult() - Result found: ${JSON.stringify(result)}`);
         if (typeof result.confirmation_result === UNDEFINED || result.confirmation_result == false) {
-          ctx.status = 500;
-          ctx.body = `The payment session cannot be proceeded with false confirmation like no inventory error.`;
-          return;
+          return ['reject', 'CONFIRMATION_REJECTED', `The payment session cannot be proceeded with false confirmation like no inventory error.`];
         }
+        return [action, code, error];
       })
       .catch(err => {
-        console.error(err.message);
-        ctx.status = 500;
-        ctx.body = `The payment session was not confirmed with the error: ${err.message}`;
-        return;
+        return ['reject', 'CONFIRMATION_REJECTED', `The payment session was not confirmed with the error: ${err.message}`];
       });
   }
 
