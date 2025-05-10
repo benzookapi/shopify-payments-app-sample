@@ -705,8 +705,6 @@ router.post('/confirm', async (ctx, next) => {
   console.log(`+++ headers +++ ${JSON.stringify(ctx.headers)}`);
   console.log(`+++ body +++ ${JSON.stringify(ctx.request.body)}`);
 
-  const shop = ctx.headers["shopify-shop-domain"];
-
   // Set the payment session confirmation result to the session cache.
   insertDB(ctx.request.body.gid, ctx.request.body, MONGO_COLLECTION_SESSION);
 
