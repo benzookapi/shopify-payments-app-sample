@@ -130,7 +130,7 @@ supports_installments = false
 multiple_capture = false
 
 # https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli?framework=remix#explore-confirm-sessions-(closed-beta)
-# This needs extra approval from Shopify, if you haven't, comment out.
+# This needs extra approval from Shopify.
 #supports_oversell_protection = true
 #confirmation_callback_url = "https://shopify-payments-app-sample.onrender.com/confirm"
 

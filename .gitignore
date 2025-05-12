@@ -5,3 +5,5 @@ package-lock.json
 /.env*
 /*.toml
 .shopify
+*.toml_bk
+
