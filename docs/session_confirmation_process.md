@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     App->>Shopify: paymentSessionConfirm (GraphQL)
     alt No userErrors
@@ -21,3 +22,4 @@ sequenceDiagram
     else action == 'reject'
         App->>Shopify: paymentSessionReject (GraphQL)
     end
+    ```
