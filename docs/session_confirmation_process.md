@@ -13,7 +13,7 @@ Shopify provides confirm sessions process for limited partners in beta as of 202
 
 
 ## Code
-- [How this apps does](../app.js) (search for `confirm`)
+- [How this app does](../app.js) (search for `confirm`)
 
 
 ```mermaid
@@ -60,5 +60,5 @@ sequenceDiagram
 - `confirmation_callback_url` requires [mTLS protection](https://shopify.dev/docs/apps/build/payments/considerations#mtls-configuration) as other session URLs do.
 
 
-# Demno
-- Check [Wiki](../../../wiki)
+## Demo
+- Check [Wiki](../../../wiki#overselling-protection)
