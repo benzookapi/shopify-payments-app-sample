@@ -61,4 +61,4 @@ sequenceDiagram
 
 
 # Demno
-- Check [Wiki](../wiki)
+- Check [Wiki](../../wiki)
