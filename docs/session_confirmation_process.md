@@ -56,7 +56,7 @@ sequenceDiagram
 
 ## Notes
 - Once a partner is given access to the session confirmation process, they can integrate to their all owned apps.
-- Once an app is enabled session confirmation by the config, the all payment sessions require confirmation process. This means, **they can NOT toggle on / off the session confirmation per merchant.**
+- Once an app is enabled session confirmation by the config, all the payment sessions require confirmation process. This means, **they can NOT toggle on / off the session confirmation per merchant.**
 - `confirmation_callback_url` requires [mTLS protection](https://shopify.dev/docs/apps/build/payments/considerations#mtls-configuration) as other session URLs do.
 
 
