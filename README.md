@@ -58,7 +58,7 @@ Use the following link.
 `YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT`
 
 # Demo
-Check [Wiki](../shopify-payments-app-sample/wiki) for basic flow.
+Check [Wiki](../../wiki) for basic flow.
 
 # TIPS
 - If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
@@ -70,8 +70,9 @@ Check [Wiki](../shopify-payments-app-sample/wiki) for basic flow.
 - Even if your redirection to the Shopify thank you page **FAILS** for some reason (the buyer's network issue, etc.) but `PaymentSessionResolve / Pending` API can be executed successfully in your server, **Shopify makes the order with the status to send a thank you email to the buyer** (which means, you should **NOT** call those APIs before the buyer make a payment).
 
 # Best practice
-Use `group` in the payment session body to prevent from unexpected duplicated paymwents for a single order.
-https://shopify.dev/docs/apps/payments/implementation/process-an-offsite-payment
+- Use `group` in the [payment session body](https://shopify.dev/docs/apps/build/payments/request-reference#offsite-payment) to prevent from unexpected duplicated paymwents for a single order.
+
+- For overselling protection, check [this page](./docs/session_confirmation_process.md)
 
 # Disclaimer
 - This code is fully _unofficial_ and NOT guaranteed to pass [the public app review](https://shopify.dev/apps/store/review) for Shopify app store. The official requirements are described [here](https://shopify.dev/apps/store/requirements). 
