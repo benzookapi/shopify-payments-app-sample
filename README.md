@@ -33,13 +33,14 @@ SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
     - _shop_deletion_url in [webhooks.privacy_compliance]_ = `YOUR_APP_URL/webhookgdpr`
 
 3. Specify the following URLs in [payment extension toml file](./extensions/my-test-pay-ext/shopify.extension.toml) following [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). **NOTE THAT** these URLs must be protected by [mTLS handshake](https://shopify.dev/docs/apps/build/payments/considerations#mtls-configuration). 
-  payment_session_url =  `YOUR_APP_URL/payment`
 
-  refund_session_url =  `YOUR_APP_URL/refund`
+    - payment_session_url =  `YOUR_APP_URL/payment`
 
-  capture_session_url = `YOUR_APP_URL/capture`
+    - refund_session_url =  `YOUR_APP_URL/refund`
 
-  void_session_url = `YOUR_APP_URL/void`
+    - capture_session_url = `YOUR_APP_URL/capture`
+
+    - void_session_url = `YOUR_APP_URL/void`
 
 4. Execute `shopify app deploy --reset`.
 
