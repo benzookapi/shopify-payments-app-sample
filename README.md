@@ -1,8 +1,8 @@
 # Overview
-A runnable sample Shopify Payments app based on [Shopify developer document](https://shopify.dev/docs/apps/payments).
+A runnable sample Shopify Payments app based on [Shopify developer document](https://shopify.dev/docs/apps/build/payments).
 
 # Prerequisite
-**You need to get approval to be given the payment API scopes** following [these steps](https://shopify.dev/docs/apps/payments#payments-app-approval-process).
+**You need to get approval to be given the payment API scopes** following [these steps](https://shopify.dev/docs/apps/build/payments/payments-extension-review).
 
 # How to run
 1. Just deploy to Render or heroku or other Pass with the following environment variables is the easiest way to run, or `npm install && npm run start` locally.
