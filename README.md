@@ -32,20 +32,18 @@ SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
     - _customer_data_request_url in [webhooks.privacy_compliance]_ = `YOUR_APP_URL/webhookgdpr`
     - _shop_deletion_url in [webhooks.privacy_compliance]_ = `YOUR_APP_URL/webhookgdpr`
 
-3. Execute `shopify app deploy --reset`.
+3. Specify the following URLs in [payment extension toml file](./extensions/my-test-pay-ext/shopify.extension.toml) following [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). **NOTE THAT** these URLs must be protected by [mTLS handshake](https://shopify.dev/docs/apps/build/payments/considerations#mtls-configuration). 
+  payment_session_url =  `YOUR_APP_URL/payment`
 
-4. For [payment extension toml file](./extensions/my-test-pay-ext/shopify.extension.toml) details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Submit for review` in the latest version.
+  refund_session_url =  `YOUR_APP_URL/refund`
 
-# Map your mTLS paths with payment session fields
-Specify the following URLs in `extensions/my-test-pay-ext/shopify.extension.toml` described in [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli).
+  capture_session_url = `YOUR_APP_URL/capture`
 
-payment_session_url =  `YOUR_APP_URL/payment`
+  void_session_url = `YOUR_APP_URL/void`
 
-refund_session_url =  `YOUR_APP_URL/refund`
+4. Execute `shopify app deploy --reset`.
 
-capture_session_url = `YOUR_APP_URL/capture`
-
-void_session_url = `YOUR_APP_URL/void`
+5. Click `Submit for review` in the latest version of app extension menu in the target app dashboard.
 
 
 # Installation Endpoint
