@@ -34,8 +34,7 @@ SHOPIFY_JWT_SECRET:           YOUR_JWT_SECRET (any value is OK)
 
 3. Execute `shopify app deploy --reset`.
 
-# Added in 2024.07
-The payment extension was migrated to CLI deployment, so you need to do [this migration steps](https://shopify.dev/docs/apps/build/payments/migrate-extensions-to-shopify-cli), too. For payment extension toml file details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Submit for review` in the latest version.
+4. For [payment extension toml file](./extensions/my-test-pay-ext/shopify.extension.toml) details, check [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli). Once you run `shopify app deploy`, don't forget to click `Submit for review` in the latest version.
 
 # Map your mTLS paths with payment session fields
 Specify the following URLs in `extensions/my-test-pay-ext/shopify.extension.toml` described in [this page](https://shopify.dev/docs/apps/build/payments/offsite/use-the-cli).
@@ -58,6 +57,9 @@ void_session_url = `YOUR_APP_URL/void`
 Use the following link.
 
 `YOUR_APP_URL/pendingcomplete?shop=SHOPIFY_SHOP_DOMAIN&id=PAYMENT_ID&kind=(sale|authorization)&action=(resolve|reject)&code=(PROCESSING_ERROR|RISKY|AUTHENTICATION_REJECTED|...)&error=ERROR_MESSAGE_FOR_REJECT`
+
+# Demo
+Check [Wiki](../shopify-payments-app-sample/wiki) for basic flow.
 
 # TIPS
 - If you input 500 or 400 or 404 or 405 to customer's first name (given_name) in the shipping address, the app responses that HTTP error status to Shopify's session request body which prevents all following steps. 
